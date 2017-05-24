@@ -1,436 +1,60 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <algorithm>
-#include <set>
-#include <cassert>
-using namespace std;
+Abstract base classes in C++ can only be used as base classes. Thus, they are allowed to have virtual member functions without definitions.
 
-struct Node{
-   Node* next;
-   Node* prev;
-   int value;
-   int key;
-   Node(Node* p, Node* n, int k, int val):prev(p),next(n),key(k),value(val){};
-   Node(int k, int val):prev(NULL),next(NULL),key(k),value(val){};
-};
+A cache is a component that stores data so future requests for that data can be served faster. The data stored in a cache might be the results of an earlier computation, or the duplicates of data stored elsewhere. A cache hit occurs when the requested data can be found in a cache, while a cache miss occurs when it cannot. Cache hits are served by reading data from the cache which is faster than recomputing a result or reading from a slower data store. Thus, the more requests that can be served from the cache, the faster the system performs.
 
-class Cache{
-   
-   protected: 
-   map<int,Node*> mp; //map the key to the node in the linked list
-   int cp;  //capacity
-   Node* tail; // double linked list tail pointer
-   Node* head; // double linked list head pointer
-   virtual void set(int, int) = 0; //set function
-   virtual int get(int) = 0; //get function
+One of the popular cache replacement policies is: "least recently used" (LRU). It discards the least recently used items first.
 
-};
+For example, if a cache with a capacity to store 5 keys has the following state(arranged from most recently used key to least recently used key) -
 
-class LRUCache:public Cache{
-   // private:
-  //  int key, val;
-   // int capacity;
-   // int node_count;
-    
-    public:
-        
-        LRUCache(){
-		cp= 0;
-		head=NULL;
-                tail=NULL; 
-	}
-        
-        LRUCache(int capacity)
-        {
-           // this->capacity=capacity;
-            
-             while(capacity<1 ||capacity>1000)
-            {
-                cin>>capacity;
-            }
-            
-            cp=capacity;
-            
-            
-          //  node_count=0;
-            head=NULL;
-            tail=NULL; 
-            this->mp.clear();
-        }
-        
-        void print()
-        {
-            cout<<"\nPrinting Linked List:\n";
-            Node* current=head;
-            while(current!=NULL)
-            {
-                cout<<current->key<<" "<<current->value<<endl;
-                current=current->next;
-            }
-        }
-        
-        void set (int key, int val)
-        {
-         /*   while(key<1 ||key>20)
-            {
-                cin>>key;
-            }
-            
-            while(val<1 ||val>2000)
-            {
-                cin>>val;
-            }*/
-            
-            map<int,Node*>::iterator mp_it;
-          
-            mp_it=mp.find(key);
-          //  cout<<"Map Size:"<<mp.size()<<endl;
-           
-            if(mp_it==mp.end())
-            {    
-            //   cout<<"Capacity:"<<cp<<endl;           
-               Node* newNode= new Node(NULL, NULL,key,val);    
-               mp_it=mp.begin();
-               mp.insert(mp_it,pair<int, Node*>(key,newNode));                        
-             //  cout<<"Map Size:"<<mp.size()<<endl;
-               
-               Node* temp=head;
-               newNode->next=head;
-               newNode->prev=NULL;               
-               head=newNode;
-               
-               if(tail==NULL)
-               {
-                    tail=head;
-                    tail->next=NULL;
-                    tail->prev=NULL;
-               }
-            
-               
-                if(mp.size()>cp)
-                     {
-                          Node* current=head;
-                        //  map<int,Node*>::reverse_iterator rit=mp.rbegin();                                                   
-                          if(current->next==NULL)
-                          {
-                             
-                              tail=head;
-                              tail->next=NULL;                            
-                          }
-                          
-                          
-                          else
-                          {
-                             // tail=tail->prev;
-                           while(current->next->next!=NULL)
-                          {
-                              current=current->next;                                                  
-                          }
-                           int temp_key=current->next->key;
-                           tail=current;
-                           tail->next=NULL;
-                           if(!mp.empty()){
-                              mp.erase(temp_key);
-                           }
-                          }
-                         // mp.erase(rit->first);
-                          
-                       
-                     }
-               
-            }
-            else
-            {
-                Node* temp_node=mp_it->second;
-                temp_node->value=val;
-                Node* current=head;
-                if(current==NULL)
-                {
-                  Node* newNode= new Node(NULL, NULL, key,val); 
-                  head=newNode;
-                  if(tail==NULL)
-                      tail=head;
-               
-                   mp_it=mp.begin();
-                   mp.insert(mp_it,pair<int, Node*>(key,newNode));
-               
-                if(mp.size()>cp)
-                     {
-                          Node* current=head;
-                         // map<int,Node*>::reverse_iterator rit2=mp.rbegin();
-                          if(current->next==NULL)
-                          {
-                              tail=head;
-                              tail->next=NULL;
-                              tail->prev=NULL;
-                              //node_count--;
-                          }
-                          else
-                          {                           
-                           while(current->next->next!=NULL)
-                            {
-                              current=current->next;
-                             
-                              
-                            //  node_count--;
-                            }
-                           int temp_key=current->next->key;
-                           tail=current;
-                           tail->next=NULL;
-                           if(!mp.empty()){
-                              mp.erase(temp_key);
-                           }
-                          }
-                         
-                     }
-                }
-                else
-                {
-                    //first delete the node, then insert
-                    
-                   Node* newNode= new Node(NULL, NULL,key,val);
-                    
-                   Node* current=head;
-                    
-                    if(head->key==key)
-                    {
-                       // do nothing if the set key is in the head of the list
-                       // mp[key]=newNode;
-                        head->value=val;
-                    }
-                    
-                    else if(tail->key==key)
-                    {
-                       // Node* temp_tail=tail;
-                        
-                        
-                       // tail=tail->prev; //modify here
-                        //tail->next=NULL;
-                        
-                        // Node* current=head;
-                         // map<int,Node*>::reverse_iterator rit2=mp.rbegin();
-                   /*       if(current->next==NULL)
-                          {
-                              tail=head;
-                              tail->next=NULL;
-                              tail->prev=NULL;
-                              //node_count--;
-                          }
-                          else
-                          {
-                             // tail=tail->prev;
-                             // tail->next=NULL;
-                             // node_count--;
-                              while(current->next->next!=NULL)
-                          {
-                              current=current->next;
-                             
-                              
-                            //  node_count--;
-                          }
-                          // int temp_key=current->next->key;
-                           int temp_val=current->next->value;
-                           tail=current;
-                           tail->next=NULL;
-                       // delete temp_tail;
-                        
-                      
-                         Node* newNode= new Node(key,val);                                             
-                        newNode->next=head;
-                       // head->prev=newNode;
-                        head=newNode;
-                        if(tail==NULL)
-                            tail=head;
-                        
-                      } */
-                        tail->value=val;
-                   }
-                    
-                    else{
-                        
-                    
-                    while(current->next!=NULL)
-                    {
-                        if(current->next->key==key)
-                        {
-                        /*    Node* temp=current->next;
-                            current->next=temp->next;
-                           // temp->next->prev=current;
-                          //  temp=NULL;
-                            delete temp;*/
-                            
-                            current->next->value=val;
-                        }
-                        current=current->next;
-                            
-                    }
-                    //insert the node in the front
-             /*       Node* newNode= new Node(key,val);                 
-                    newNode->next=head;                   
-                    head=newNode;*/
-                    
-                    }                                                             
-                }
-                
-            }
-            
-         /*   for(mp_it=mp.begin();mp_it!=mp.end();++mp_it)
-               {
-                   cout<<mp_it->first<<" "<<mp_it->second->value<<endl;
-               }*/
-        }
-        
-      int get(int key)
-      {
-            map<int,Node*>::iterator mp_it;
-          
-            mp_it=mp.find(key);
-            if(mp_it!=mp.end())
-            {    
-                int temp_value=mp_it->second->value;
-             /*   cout<<"Printing get value:"<<temp_value<<endl;
-                for(mp_it=mp.begin();mp_it!=mp.end();++mp_it)
-               {
-                   cout<<mp_it->first<<" "<<mp_it->second->value<<endl;
-               }
-                */
-                    Node* current=head;
-                    
-                    if(head->key==key)
-                    {
-                       // do nothing
-                     //   return head->value;
-                       // return temp_value;
-                    }
-                    
-                    else if(tail->key==key)
-                    {
-                       // int temp_val=tail->value;
-                   /*    
-                        Node* temp=tail;
-                        tail=tail->prev;
-                        tail->next=NULL;
-                        delete temp;                        
-                        Node* newNode= new Node(key,temp_val);   
-                        newNode->next=head;
-                        head=newNode;
-                        
-                         if(tail==NULL)
-                            tail=head;
-                        */
-                        
-                         if(current->next==NULL)
-                          {
-                              tail=head;
-                              tail->next=NULL;       
-                          }
-                          else
-                          {
-                              while(current->next->next!=NULL)
-                              {
-                              current=current->next;
-                              }
-                           tail=current;
-                           tail->next=NULL;                                                
-                       // delete temp_tail;
-                        
-                        Node* newNode= new Node(key,temp_value);  
-                        newNode->next=head;
-                       // head->prev=newNode;
-                        head=newNode;
-                        if(tail==NULL)
-                            tail=head;
-                      } 
-                        
-                      //  return temp_value;
-                        
-                    }
-                    
-                    else{
-                        
-                  /*  int temp_val2;
-                    while(current->next!=NULL)
-                    {
-                        if(current->next->key==key)
-                        {
-                            Node* temp=current->next;
-                            temp_val2=temp->value;
-                            current->next=temp->next;
-                            temp->next->prev=current;
-                           // temp=NULL;
-                            delete temp;
-                            
-                        }
-                        current=current->next;
-                            
-                    }
-                    //insert the node in the front
-                    Node* newNode= new Node(key,mp[key]->value);  
-                    newNode->next=head;
-                    head=newNode;
-                    return head->value;
-                    */
-                   
-                //   int temp_val2;
-                   Node* current=head;
-                   while(current->next!=NULL)
-                    {
-                        if(current->next->key==key)
-                        {
-                            Node* temp=current->next;
-                            current->next=temp->next;
-                            temp=NULL;
-                            delete temp;
-                            
-                            break;
-                        }
-                        current=current->next;
-                            
-                    }
-                    //insert the node in the front
-                    Node* newNode= new Node(key,temp_value);   
-                    newNode->next=head;
-                    head=newNode;                    
-                    if(tail==NULL)
-                        tail=head;
-                                                
-                    }                        
- 
-                 return temp_value;
-               
-            }
-            else
-            {
-                
-                return -1;
-            }
-                
-        }
-    
-};
+5 3 2 1 4
+
+Now, If the next key comes as 1(which is a cache hit), then the cache state in the same order will be -
+
+1 5 3 2 4
+
+Now, If the next key comes as 6(which is a cache miss), then the cache state in the same order will be -
+
+6 1 5 3 2
+
+You can observe that 4 has been discarded because it was the least recently used key and since the capacity of cache is 5, it could not be retained in the cache any longer.
+
+Given an abstract base class Cache with member variables and functions:
+
+mp - Map the key to the node in the linked list
+cp - Capacity
+tail - Double linked list tail pointer
+head - Double linked list head pointer
+set() - Set/insert the value of the key, if present, otherwise add the key as the most recently used key. If the cache has reached its capacity, it should replace the least recently used key with a new key.
+get() - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1. Then make that key as the most recently used key.
+
+You have to write a class LRUCache which extends the class Cache and uses the member functions and variables to implement an LRU cache.
+
+Input Format
+
+First line of input will contain the number of lines containing or commands followed by the capacity of the cache.
+The following lines can either contain or commands.
+An input line starting with will be followed by a to be found in the cache. An input line starting with will be followed by the and respectively to be inserted/replaced in the cache.
+
+Constraints
 
 
-int main() {
-   int n, capacity,i;
-   cin >> n >> capacity;
-   LRUCache l(capacity);
-   for(i=0;i<n;i++) {
-      string command;
-      cin >> command;
-      if(command == "get") {
-         int key;
-         cin >> key;
-         cout << l.get(key) << endl;
-          l.print();
-      } 
-      else if(command == "set") {
-         int key, value;
-         cin >> key >> value;
-         l.set(key,value);
-         l.print();
-      }
-   }
-   return 0;
-}
+
+Output Format
+
+The code provided in the editor will use your derived class LRUCache to output the value whenever a get command is encountered.
+
+Sample Input
+
+3 1
+set 1 2
+get 1
+get 2
+
+Sample Output
+
+2
+-1
+
+Explanation
+
+Since, the capacity of the cache is 1, the first set results in setting up the key 1 with it's value 2. The first get results in a cache hit of key 1, so 2 is printed as the value for the first get. The second get is a cache miss, so -1 is printed.
